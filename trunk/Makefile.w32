@@ -1,0 +1,20 @@
+# TODO: fix this once I actually get access to a PC again.
+
+# "nmake" makefile for all-maximal-sets on PC with Miscrosoft VC++
+
+# For optimized executable:
+CFLAGS = /DNDEBUG /DMICROSOFT /O2 /D_FILE_OFFSET_BITS=64
+
+.SUFFIXES: .obj .cc
+
+OBJS_c =  allmaximalsets.cc
+OBJS_o = $(OBJS_c:.cc=.obj)
+
+ap.exe: $(OBJS_c) $(OBJS_o) main.obj main.cc
+	$(CC) $(LDFLAGS) $(CFLAGS) -o ams $(OBJS_o) main.obj
+
+clean:
+	del *.obj ams.exe
+
+.cc.obj:
+	$(CC) $(CFLAGS) /c $<
