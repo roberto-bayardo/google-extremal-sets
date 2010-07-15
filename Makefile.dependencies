@@ -1,0 +1,21 @@
+all-maximal-sets.o: all-maximal-sets.cc all-maximal-sets.h basic-types.h \
+  data-source-iterator.h set-properties.h
+main.o: main.cc all-maximal-sets.h basic-types.h data-source-iterator.h
+data-source-iterator.o: data-source-iterator.cc data-source-iterator.h \
+  basic-types.h
+set-properties.o: set-properties.cc set-properties.h basic-types.h
+all-maximal-sets-cardinality.o: all-maximal-sets-cardinality.cc \
+  all-maximal-sets-cardinality.h basic-types.h set-properties.h \
+  data-source-iterator.h
+main-cardinality.o: main-cardinality.cc all-maximal-sets-cardinality.h \
+  basic-types.h data-source-iterator.h
+data-source-iterator.o: data-source-iterator.cc data-source-iterator.h \
+  basic-types.h
+set-properties.o: set-properties.cc set-properties.h basic-types.h
+main-sorter.o: main-sorter.cc data-source-iterator.h basic-types.h \
+  sorter.h
+sorter.o: sorter.cc sorter.h basic-types.h data-source-iterator.h \
+  set-properties.h
+data-source-iterator.o: data-source-iterator.cc data-source-iterator.h \
+  basic-types.h
+set-properties.o: set-properties.cc set-properties.h basic-types.h
