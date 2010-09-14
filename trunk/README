@@ -1,0 +1,64 @@
+OVERVIEW
+
+This package contains three algorithms for finding all maximal
+itemsets within a given collection of itemsets. The algorithms are as
+follows:
+
+1) ams-cardinality: This algorithm requires the input collection be
+sorted in increasing itemset cardinality.
+
+2) ams-lexicographic: This algorithm requires the input collection be
+sorted in increasing lexicographic order.
+
+3) ams-satelite: This algorithm has no requirements on the input
+collection sort order, but usually performs better on lexicographic
+sorted data than unsorted or cardinality sorted itemsets. The
+algorithm implements the subsumption detection strategy from the
+SateLite propositional satisfiability simplifier, though without the
+bloom filter step since this optimization is only beneficial for small
+itemsets:
+
+  Niklas Eén and Armin Biere, Effective preprocessing in sat through
+  variable and clause elimination, In proc. SAT’05, LNCS vol. 3569,
+  Springer, 61-75, 2005.
+
+PERFORMANCE
+
+The performance of ams-lexicographic is almost always better than that
+of the other algorithms.  On cardinality sorted data, ams-cardinality
+always outperfroms ams-satelite; however ams-satelite when run on
+lexicographically sorted data may sometimes outperform ams-cardinality
+(which requires cardinality sorted input). We presume this is due to
+improvements in spatial and temporal locality.
+
+The ams-lexicographic and ams-cardinality approaches use much less
+memory than ams-satelite, and also support datasets that are too large
+to fit into RAM.  The size of the RAM buffer used by these algorithms
+can be configured in their respective main() procedures.
+
+DATASET FORMAT
+
+The dataset format expected by the algorithm is "apriori binary."  In
+an apriori binary encoded dataset, each vector has the following
+format where each component is encoded as a raw 4-byte integer:
+
+<record id> <number of features> <fid 1> <fid 2> ... <fid n>
+
+(Endianness of the integers should match that of your platform,
+e.g. little-endian for Intel x86 architectures.)
+
+Record ids can be arbitrary integers. Feature ids should be assigned
+such that feature id "i" corresponds to the "ith" least frequently
+occuring feature in the dataset.  For example, the feature with id
+whose integer value is "1" should be the least frequently occurring
+value in the dataset.  Feature ids within a vector should then appear
+in increasing order of their id.
+
+It is easy to extend the algorithm to read CSV formatted data if
+desired.
+
+Recall that some algorithms have requirements on the ordering of
+itemsets within a dataset. This package contains a utility, "sorter",
+which can be used to convert apriori binary datasets between
+cardinality based and lexicographical sort orders. At this time the
+utility only works on memory resident data.
