@@ -7,14 +7,33 @@ CFLAGS = /DNDEBUG /DMICROSOFT /O2 /D_FILE_OFFSET_BITS=64
 
 .SUFFIXES: .obj .cc
 
-OBJS_c =  allmaximalsets.cc
-OBJS_o = $(OBJS_c:.cc=.obj)
+OBJS_lexicographic_c = all-maximal-sets-lexicographic.cc main-lexicographic.cc $(OBJS_c)
+OBJS_lexicographic_o = $(OBJS_lexicographic_c:.cc=.obj)
 
-ap.exe: $(OBJS_c) $(OBJS_o) main.obj main.cc
-	$(CC) $(LDFLAGS) $(CFLAGS) -o ams $(OBJS_o) main.obj
+OBJS_cardinality_c = all-maximal-sets-cardinality.cc main-cardinality.cc $(OBJS_c)
+OBJS_cardinality_o = $(OBJS_cardinality_c:.cc=.obj)
+
+OBJS_satelite_c = all-maximal-sets-satelite.cc main-satelite.cc $(OBJS_c)
+OBJS_satelite_o = $(OBJS_satelite_c:.cc=.obj)
+
+OBJS_sorter_c = main-sorter.cc sorter.cc $(OBJS_c)
+OBJS_sorter_o = $(OBJS_sorter_c:.cc=.obj)
+
+ams-lexicographic.exe:  $(OBJS_lexicographic_c) $(OBJS_lexicographic_o)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o ams-lexicographic $(OBJS_lexicographic_o)
+
+ams-cardinality.exe:  $(OBJS_cardinality_c) $(OBJS_cardinality_o)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o ams-cardinality $(OBJS_cardinality_o)
+
+
+ams-satelite.exe:  $(OBJS_satelite_c) $(OBJS_satelite_o)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o ams-satelite $(OBJS_satelite_o)
+
+ams-sorter.exe:  $(OBJS_sorter_c) $(OBJS_sorter_o)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o sorter $(OBJS_sorter_o)
 
 clean:
-	del *.obj ams.exe
+	del *.obj ams-lexicographic.exe ams-cardinality.exe ams-satelite.exe ams-sorter.exe
 
 .cc.obj:
 	$(CC) $(CFLAGS) /c $<
