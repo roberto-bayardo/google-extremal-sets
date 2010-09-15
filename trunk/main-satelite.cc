@@ -22,6 +22,7 @@
 #include <time.h>
 
 #include <iostream>
+#include <memory>
 
 #include "all-maximal-sets-satelite.h"
 #include "data-source-iterator.h"

@@ -22,6 +22,7 @@
 #include <time.h>
 
 #include <iostream>
+#include <memory>
 
 #include "all-maximal-sets-cardinality.h"
 #include "data-source-iterator.h"
