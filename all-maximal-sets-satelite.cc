@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ---
+// An algorithm for finding all maximal sets based on the approach
+// used by SateLite (minus the bloom filters).
+// ---
 // Author: Roberto Bayardo
 
 #include "all-maximal-sets-satelite.h"
