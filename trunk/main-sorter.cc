@@ -31,8 +31,10 @@
 #include <iostream>
 #include <memory>
 
-#include "data-source-iterator.h"
 #include "sorter.h"
+#include "data-source-iterator.h"
+
+using google_extremal_sets::DataSourceIterator;
 
 int main(int argc, char** argv) {
   time_t start_time;
@@ -54,7 +56,8 @@ int main(int argc, char** argv) {
         DataSourceIterator::Get(argv[1 + offset]));
     if (!data.get())
       return 2;
-    bool result = util::Sort(data.get(), argv[2 + offset], by_cardinality);
+    bool result = google_extremal_sets::Sort(
+        data.get(), argv[2 + offset], by_cardinality);
 
     if (!result) {
       std::cerr << "IO ERROR: " << data->GetErrorMessage() << "\n";

@@ -7,6 +7,8 @@ CFLAGS = /DNDEBUG /DMICROSOFT /O2 /D_FILE_OFFSET_BITS=64
 
 .SUFFIXES: .obj .cc
 
+OBJS_c = data-source-iterator.cc set-properties.cc
+
 OBJS_lexicographic_c = all-maximal-sets-lexicographic.cc main-lexicographic.cc $(OBJS_c)
 OBJS_lexicographic_o = $(OBJS_lexicographic_c:.cc=.obj)
 
@@ -18,6 +20,8 @@ OBJS_satelite_o = $(OBJS_satelite_c:.cc=.obj)
 
 OBJS_sorter_c = main-sorter.cc sorter.cc $(OBJS_c)
 OBJS_sorter_o = $(OBJS_sorter_c:.cc=.obj)
+
+all: ams-lexicographic.exe ams-cardinality.exe ams-satelite.exe ams-sorter.exe
 
 ams-lexicographic.exe:  $(OBJS_lexicographic_c) $(OBJS_lexicographic_o)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o ams-lexicographic $(OBJS_lexicographic_o)
