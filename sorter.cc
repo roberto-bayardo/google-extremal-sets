@@ -25,7 +25,7 @@
 #include "data-source-iterator.h"
 #include "set-properties.h"
 
-namespace util {
+namespace google_extremal_sets {
 
 SetPropertiesCompareFunctor compare_set_properties;
 SetPropertiesCardinalityCompareFunctor compare_set_properties_cardinality;
@@ -86,4 +86,4 @@ bool Sort(
   return true;
 }
 
-}  // namespace util
+}  // namespace google_extremal_sets

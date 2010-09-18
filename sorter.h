@@ -20,16 +20,18 @@
 #ifndef _SORTER_H_
 #define _SORTER_H_
 
-class DataSourceIterator;
+namespace google_extremal_sets {
 
-namespace util {
+class DataSourceIterator;
 
 // Sorts the input data and writes it to the output_file in apriori
 // binary format. Returns false on IO error. Sort order is increasing
 // lexicographic if by_cardinality is false, and increasing cardinality
 // otherwise.
 bool Sort(
-    DataSourceIterator* data, const char* output_path, bool by_cardinality);
+    DataSourceIterator* data,
+    const char* output_path,
+    bool by_cardinality);
 
 }  // namespace util
 
