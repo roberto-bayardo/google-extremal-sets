@@ -38,7 +38,7 @@ const uint32_t kMaxVectorSize = 99999;
 
 std::string ToString(uint32_t l) {
   char buf[30];
-  sprintf(buf, "%lu", l);
+  sprintf(buf, "%u", l);
   return std::string(buf);
 }
 
@@ -126,7 +126,7 @@ int DataSourceIterator::Next(uint32_t* vector_id, std::vector<uint32_t>* vec) {
 int DataSourceIterator::NextText(uint32_t* vector_id, std::vector<uint32_t>* vec) {
   vec->clear();
   // First read the vector ID
-  int scan_result = fscanf(data_, "%ld", vector_id);
+  int scan_result = fscanf(data_, "%u", vector_id);
   if (!scan_result) {
     if (ferror(data_)) {
       error_ = "Dataset read error, ferror code=" + ToString(ferror(data_));
@@ -140,7 +140,7 @@ int DataSourceIterator::NextText(uint32_t* vector_id, std::vector<uint32_t>* vec
 
   // Now read the item ids, until we reach the "0" terminator.
   uint32_t item_id;
-  while ((scan_result = fscanf(data_, "%ld", &item_id)) != EOF && scan_result != 0) {
+  while ((scan_result = fscanf(data_, "%u", &item_id)) != EOF && scan_result != 0) {
     if (item_id)
       vec->push_back(item_id);
     else {

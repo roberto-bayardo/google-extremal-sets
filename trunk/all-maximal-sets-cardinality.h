@@ -96,7 +96,7 @@ class AllMaximalSetsCardinality {
   // Prepare datastructures for scanning the data beginning at the
   // provided offset. Returns false if IO error encountered.
   bool PrepareForDataScan(
-      DataSourceIterator* data, int max_item_i, off_t seek_offset);
+      DataSourceIterator* data, uint32_t max_item_i, off_t seek_offset);
 
   // A list of itemsets used to store candidates within the candidate
   // map.
@@ -113,7 +113,7 @@ class AllMaximalSetsCardinality {
   SetProperties* NextCandidate(
       const CandidateList& candidates,
       const std::vector<uint32_t>& current_set,
-      int current_index,
+      unsigned int current_index,
       int* candidate_index);
 
   // Dump out & delete all sets that remain in the candidate index and

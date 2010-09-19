@@ -49,7 +49,7 @@ bool Sort(
     // Check for itemsets that are not properly sorted / contain
     // duplicate items.
     bool not_sorted = false;
-    for (int i = 0; i < set->size - 1; ++i) {
+    for (uint32_t i = 0; i < set->size - 1; ++i) {
       if (set->item[i] >= set->item[i + 1]) {
         not_sorted = true;
         break;
@@ -73,7 +73,7 @@ bool Sort(
     sort(sort_us.begin(), sort_us.end(), compare_set_properties);
   std::cerr
       << "; Writing " << sort_us.size() << " itemsets to file..." << std::endl;
-  for (int i = 0; i < sort_us.size(); ++i) {
+  for (uint32_t i = 0; i < sort_us.size(); ++i) {
     SetProperties* set = sort_us[i];
     if (!fwrite(set, sizeof(uint32_t), 2 + set->size, output_file)) {
       // TODO: fix mem leak

@@ -93,7 +93,7 @@ class AllMaximalSetsSateLite {
   // Prepare datastructures for scanning the data beginning at the
   // provided offset. Returns false if IO error encountered.
   bool PrepareForDataScan(
-      DataSourceIterator* data, int max_item_i, off_t seek_offset);
+      DataSourceIterator* data, uint32_t max_item_i, off_t seek_offset);
 
   // Once the occurs_ lists have been populated, this method can be
   // called to determine whether a given candidate is properly

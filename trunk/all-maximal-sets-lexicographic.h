@@ -106,10 +106,10 @@ class AllMaximalSetsLexicographic {
   // Prepare datastructures for scanning the data beginning at the
   // provided offset. Returns false if IO error encountered.
   bool PrepareForDataScan(
-      DataSourceIterator* data, int max_item_i, off_t seek_offset);
+      DataSourceIterator* data, uint32_t max_item_i, off_t seek_offset);
 
   // Delete any candidate subsumed by the given input_set.
-  void DeleteSubsumedCandidates(int candidate_index);
+  void DeleteSubsumedCandidates(unsigned int candidate_index);
   void DeleteSubsumedCandidates(const ItemSet& itemset);
 
   // Call FoundMaximalSet for all sets that remain as candidates, and
@@ -126,26 +126,26 @@ class AllMaximalSetsLexicographic {
     CandidateList::iterator begin_range_it,
     CandidateList::iterator end_range_it,
     const uint32_t* current_set_it,
-    int depth);
+    unsigned int depth);
 
   // Invoked by Recurse to delete & advance over any candidates that
   // are equal to the current prefix (and are hence subsumed).
   void DeleteSubsumedSets(
     CandidateList::iterator* begin_range_it,
     CandidateList::iterator end_range_it,
-    int depth);
+    unsigned int depth);
 
   CandidateList::iterator GetNewBeginRangeIt(
       CandidateList::iterator begin_range_it,
       CandidateList::iterator end_range_it,
-      uint32_t current_item,
-      int depth);
+      unsigned int current_item,
+      unsigned int depth);
 
   CandidateList::iterator GetNewEndRangeIt(
       CandidateList::iterator begin_range_it,
       CandidateList::iterator end_range_it,
-      uint32_t current_item,
-      int depth);
+      unsigned int current_item,
+      unsigned int depth);
 
   // Stats variables.
   long maximal_sets_count_;
@@ -167,8 +167,8 @@ class AllMaximalSetsLexicographic {
   SetProperties* current_set_;
 
   // Configuration options.
+  uint32_t items_in_ram_, max_items_in_ram_;
   OutputModeEnum output_mode_;
-  int items_in_ram_, max_items_in_ram_;
 };
 
 }  // namespace google_extremal_sets

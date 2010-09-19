@@ -37,7 +37,7 @@ AllMaximalSetsLexicographic::CandidateList::iterator find_new_it(
     AllMaximalSetsLexicographic::CandidateList::iterator first,
     AllMaximalSetsLexicographic::CandidateList::iterator last,
     uint32_t current_item,
-    int depth,
+    unsigned int depth,
     Compare comp) {
   while (first != last && !*first)
     ++first;
@@ -68,7 +68,7 @@ AllMaximalSetsLexicographic::CandidateList::iterator find_new_it(
   }
   assert(*first);
   return first;
-};
+}
 
 }  // namespace
 
@@ -107,7 +107,7 @@ bool AllMaximalSetsLexicographic::FindAllMaximalSets(
 	      candidates_.back()->size < current_set.size()) {
 	    SetProperties* previous = candidates_.back();
 	    previous_subsumed = true;
-	    for (int i = 0; i < previous->size; ++i) {
+	    for (unsigned int i = 0; i < previous->size; ++i) {
 	      if (previous->item[i] != current_set[i]){
 		previous_subsumed = false;
 		break;
@@ -124,9 +124,9 @@ bool AllMaximalSetsLexicographic::FindAllMaximalSets(
 	} while (previous_subsumed);
 	candidates_.push_back(SetProperties::Create(set_id, current_set));
 	if (current_set[0] >= index_.size()) {
-	  int old_size = index_.size();
+	  unsigned int old_size = index_.size();
 	  index_.resize(current_set[0] + 1);
-	  for (int i = old_size; i <= current_set[0]; ++i) {
+	  for (unsigned int i = old_size; i <= current_set[0]; ++i) {
 	    index_[i] = candidates_.size() - 1;
 	  }
 	}
@@ -151,7 +151,7 @@ bool AllMaximalSetsLexicographic::FindAllMaximalSets(
 
     std::cerr << "; Potential maximal sets: " << candidates_.size() << '\n'
 	      << "; Beginning subsumption checking scan." << std::endl;
-    for (int i = 0; i < candidates_.size() - 1; ++i) {
+    for (unsigned int i = 0; i < candidates_.size() - 1; ++i) {
       if (candidates_[i])  // check to make sure not already deleted.
 	DeleteSubsumedCandidates(i);
     }
@@ -179,7 +179,7 @@ void AllMaximalSetsLexicographic::Init() {
 }
 
 bool AllMaximalSetsLexicographic::PrepareForDataScan(
-    DataSourceIterator* data, int max_item_id, off_t resume_offset) {
+    DataSourceIterator* data, uint32_t max_item_id, off_t resume_offset) {
   assert(candidates_.size() == 0);
   index_.reserve(max_item_id + 1);
   std::cerr << "; Starting new dataset scan at offset: "
@@ -187,7 +187,7 @@ bool AllMaximalSetsLexicographic::PrepareForDataScan(
   return data->Seek(resume_offset);
 }
 
-void AllMaximalSetsLexicographic::DeleteSubsumedCandidates(int current_set_index) {
+void AllMaximalSetsLexicographic::DeleteSubsumedCandidates(unsigned int current_set_index) {
   current_set_ = candidates_[current_set_index];
   assert(current_set_);
   // If the set is of size 1 it cannot subsume anything (assuming no
@@ -220,7 +220,7 @@ void AllMaximalSetsLexicographic::DeleteSubsumedCandidates(const ItemSet& itemse
 inline void AllMaximalSetsLexicographic::DeleteSubsumedSets(
     CandidateList::iterator* begin_range_it,
     CandidateList::iterator end_range_it,
-    int depth) {
+    unsigned int depth) {
   // If current_set_->size() == depth, then the current set
   // cannot *properly* subsume any candidates.
   if (current_set_->size > depth) {
@@ -247,7 +247,7 @@ AllMaximalSetsLexicographic::CandidateList::iterator AllMaximalSetsLexicographic
     CandidateList::iterator begin_range_it,
     CandidateList::iterator end_range_it,
     uint32_t current_item,
-    int depth) {
+    unsigned int depth) {
   ++canidate_seek_count_;
   if (depth == 0) {
     // At depth 0 we can use the index rather than binary search.
@@ -273,7 +273,7 @@ inline AllMaximalSetsLexicographic::CandidateList::iterator AllMaximalSetsLexico
     CandidateList::iterator begin_range_it,
     CandidateList::iterator end_range_it,
     uint32_t current_item,
-    int depth) {
+    unsigned int depth) {
   ++canidate_seek_count_;
   CandidateList::iterator new_end_range_it;
   if (depth == 0) {
@@ -304,7 +304,7 @@ void AllMaximalSetsLexicographic::DeleteSubsumedFromRange(
     CandidateList::iterator begin_range_it,
     CandidateList::iterator end_range_it,
     const uint32_t* current_set_it,
-    int depth) {
+    unsigned int depth) {
   assert(begin_range_it != end_range_it);
   DeleteSubsumedSets(&begin_range_it, end_range_it, depth);
   if (begin_range_it == end_range_it || current_set_it == current_set_->end())
@@ -347,7 +347,7 @@ void AllMaximalSetsLexicographic::DeleteSubsumedFromRange(
 }
 
 void AllMaximalSetsLexicographic::DumpMaximalSets() {
-  for (int i = 0; i < candidates_.size(); ++i) {
+  for (unsigned int i = 0; i < candidates_.size(); ++i) {
     SetProperties* maximal_set = candidates_[i];
     if (maximal_set) {
       FoundMaximalSet(*maximal_set);
