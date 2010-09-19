@@ -86,7 +86,7 @@ bool AllMaximalSetsCardinality::FindAllMaximalSets(
 
       // If current_set has higher cardinality than the itemsets within
       // index_us, we move them from index_us into the candidate index.
-      if (current_set.size() != current_set_size) {
+      if (current_set.size() != static_cast<uint32_t>(current_set_size)) {
         IndexSets(index_us);
         index_us.clear();
         current_set_size = current_set.size();
@@ -127,7 +127,7 @@ void AllMaximalSetsCardinality::Init() {
 }
 
 bool AllMaximalSetsCardinality::PrepareForDataScan(
-    DataSourceIterator* data, int max_item_id, off_t resume_offset) {
+    DataSourceIterator* data, uint32_t max_item_id, off_t resume_offset) {
   assert(candidates_.size() == 0);
   candidates_.resize(max_item_id);
   std::cerr << "; Starting new dataset scan at offset: "
@@ -150,11 +150,11 @@ void AllMaximalSetsCardinality::IndexSets(const std::vector<SetProperties*>& ind
 inline SetProperties* AllMaximalSetsCardinality::NextCandidate(
     const CandidateList& candidates,
     const std::vector<uint32_t>& current_set,
-    int current_index,
+    unsigned int current_index,
     int* candidate_index) {
   do {
     ++(*candidate_index);
-    if (*candidate_index == candidates.size())
+    if (static_cast<unsigned int>(*candidate_index) == candidates.size())
       return 0;
   } while (!candidates[*candidate_index]);
 
@@ -169,17 +169,17 @@ void AllMaximalSetsCardinality::DeleteSubsumedCandidates(
   std::vector<uint32_t>::const_iterator current_begin = current_set.begin();
   std::vector<uint32_t>::const_iterator current_end = current_set.end();
   SetProperties* candidate = 0;
-  for (int i = 0; i < current_set.size(); ++i, ++current_begin) {
+  for (unsigned int i = 0; i < current_set.size(); ++i, ++current_begin) {
     if (candidates_.size() <= current_set[i])
       return;
     CandidateList& candidates = candidates_[current_set[i]];
     int candidate_index = -1;
-    while (candidate =
+    while ((candidate =
            NextCandidate(
                candidates,
                current_set,
                i,
-               &candidate_index)) {
+               &candidate_index))) {
       // We must explicitly check subsumption. We need not check every
       // item in each set because we already know:
       // (1) the candidate does not contain any items within
@@ -207,15 +207,15 @@ void AllMaximalSetsCardinality::DeleteSubsumedCandidates(
 void AllMaximalSetsCardinality::DumpMaximalSets(
     std::vector<SetProperties*>* unindexed_sets,
     OutputModeEnum output_mode) {
-  for (int i = 0; i < unindexed_sets->size(); ++i) {
+  for (unsigned int i = 0; i < unindexed_sets->size(); ++i) {
     SetProperties* maximal_set = (*unindexed_sets)[i];
     FoundMaximalSet(*maximal_set, output_mode);
     SetProperties::Delete(maximal_set);
   }
   unindexed_sets->clear();
-  for (int i = 0; i < candidates_.size(); ++i) {
+  for (unsigned int i = 0; i < candidates_.size(); ++i) {
     CandidateList& candidate_set = candidates_[i];
-    for (int j = 0; j < candidate_set.size(); ++j) {
+    for (unsigned int j = 0; j < candidate_set.size(); ++j) {
       SetProperties* maximal_set = candidate_set[j];
       if (maximal_set) {
         FoundMaximalSet(*maximal_set, output_mode);

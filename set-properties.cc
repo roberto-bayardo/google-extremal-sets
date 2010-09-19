@@ -42,7 +42,7 @@ void SetProperties::Delete(SetProperties* delete_me) {
 
 std::ostream& operator<<(std::ostream& os, const SetProperties& output_me) {
   os << output_me.set_id << ": ";
-  for (int i = 0; i < output_me.size; ++i) {
+  for (uint32_t i = 0; i < output_me.size; ++i) {
     if (i != 0)
       os << ' ';
     os << output_me.item[i];

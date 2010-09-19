@@ -54,7 +54,7 @@ public:
   CleanerUpper(OccursList* all_sets) :
     all_sets_(all_sets) {}
   ~CleanerUpper() {
-    for (int i = 0; i < all_sets_->size(); ++i) {
+    for (unsigned int i = 0; i < all_sets_->size(); ++i) {
       SetProperties::Delete((*all_sets_)[i]);
     }
     all_sets_->clear();
@@ -93,7 +93,7 @@ bool AllMaximalSetsSateLite::FindAllMaximalSets(
       return false;
     }
     ++input_sets_count_;
-    for (int i = 0; i < index_me->size; ++i) {
+    for (unsigned int i = 0; i < index_me->size; ++i) {
       occurs_[index_me->item[i]].push_back(index_me);
     }
   }
@@ -101,7 +101,7 @@ bool AllMaximalSetsSateLite::FindAllMaximalSets(
     return false;  // IO error
 
   std::cerr << "; Starting subsumption checking scan." << std::endl;
-  for (int i = 0; i < all_sets_.size(); ++i) {
+  for (unsigned int i = 0; i < all_sets_.size(); ++i) {
     if (!IsSubsumed(*all_sets_[i]))
       FoundMaximalSet(*(all_sets_[i]), output_mode);
   }
@@ -113,7 +113,7 @@ void AllMaximalSetsSateLite::Init() {
 }
 
 bool AllMaximalSetsSateLite::PrepareForDataScan(
-    DataSourceIterator* data, int max_item_id, off_t resume_offset) {
+    DataSourceIterator* data, uint32_t max_item_id, off_t resume_offset) {
   occurs_.clear();
   occurs_.resize(max_item_id);
   std::cerr << "; Starting new dataset scan at offset: "
@@ -123,7 +123,7 @@ bool AllMaximalSetsSateLite::PrepareForDataScan(
 
 bool AllMaximalSetsSateLite::IsSubsumed(const SetProperties& candidate) {
   const OccursList& occurs = occurs_[candidate[0]];
-  for (int j = 0; j < occurs.size(); ++j) {
+  for (unsigned int j = 0; j < occurs.size(); ++j) {
     SetProperties* check_me = occurs[j];
     ++subsumption_checks_count_;
     if (IsSubsumedBy(candidate, *check_me))
@@ -143,7 +143,7 @@ void AllMaximalSetsSateLite::FoundMaximalSet(
       break;
     case ID_AND_ITEMS:
       std::cout << maximal_set.set_id << ":";
-      for (int i = 0; i < maximal_set.size; ++i) {
+      for (unsigned int i = 0; i < maximal_set.size; ++i) {
         std::cout << ' ' << maximal_set.item[i];
       }
       std::cout << '\n';
