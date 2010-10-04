@@ -13,10 +13,10 @@
 // limitations under the License.
 //
 // ---
-// Invoke the Sorter utility to sort a given binary dataset.
+// Invoke the dimacs-to-apriori utility to sort a given DIMCAS SAT instance.
 // To invoke:
 //
-// ./sorter [-c] <path_to_input_dataset> <path_to_output_dataset>
+// ./dimacs-to-apriori [-c] <path_to_dimacs_dataset> <path_to_output_dataset>
 //
 // If -c option is specified, the input dataset will be sorted in
 // increasing cardinality of its itemsets. Otherwise the dataset will
@@ -31,10 +31,9 @@
 #include <iostream>
 #include <memory>
 
-#include "sorter.h"
-#include "data-source-iterator.h"
+#include "dimacs-to-apriori.h"
 
-using google_extremal_sets::DataSourceIterator;
+using google_extremal_sets::DimacsIterator;
 
 int main(int argc, char** argv) {
   time_t start_time;
@@ -44,7 +43,7 @@ int main(int argc, char** argv) {
   if (argc != 3 && argc != 4 ||
       (argc == 4 && strcmp(argv[1], "-c") != 0)) {
     std::cerr
-        << "ERROR: Usage is: ./sorter [-c] <input_dataset_path>"
+        << "ERROR: Usage is: ./dimacs-to-apriori [-c] <input_dataset_path>"
         << " <output_dataset_path>\n";
     return 1;
   }
@@ -52,11 +51,11 @@ int main(int argc, char** argv) {
   int offset = (argc == 4) ? 1 : 0;
 
   {
-    std::auto_ptr<DataSourceIterator> data(
-        DataSourceIterator::Get(argv[1 + offset]));
+    std::auto_ptr<DimacsIterator> data(
+        DimacsIterator::Get(argv[1 + offset]));
     if (!data.get())
       return 2;
-    bool result = google_extremal_sets::Sort(
+    bool result = google_extremal_sets::DimacsToApriori(
         data.get(), argv[2 + offset], by_cardinality);
 
     if (!result) {
