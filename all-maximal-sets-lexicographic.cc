@@ -187,7 +187,6 @@ void AllMaximalSetsLexicographic::Init() {
 
 bool AllMaximalSetsLexicographic::PrepareForDataScan(
     DataSourceIterator* data, uint32_t max_item_id, off_t resume_offset) {
-  assert(candidates_.size() == 0);
   index_.reserve(max_item_id + 1);
   std::cerr << "; Starting new dataset scan at offset: "
             << resume_offset << std::endl;
@@ -321,10 +320,8 @@ void AllMaximalSetsLexicographic::DeleteSubsumedFromRange(
   if (begin_range_it == end_range_it || current_set_it == current_set_->end())
     return;
   int max_candidate_size = depth + (current_set_->end() - current_set_it);
-  if (max_candidate_size < min_length_of_itemsets_in_range_) {
-    //std::cout << max_candidate_size << " : " << min_length_of_itemsets_in_range_ << '\n';
+  if (max_candidate_size < min_length_of_itemsets_in_range_)
     return;
-  }
 
   do {  // while (begin_range_it != end_range_it)
     // First thing we do is find the next item in the current_set
@@ -340,8 +337,12 @@ void AllMaximalSetsLexicographic::DeleteSubsumedFromRange(
       return;
 
     assert(*current_set_it >= candidate_item);
-    if (depth == 0)
-      min_length_of_itemsets_in_range_ = index_[*current_set_it].second;
+    if (depth == 0) {
+      if (*current_set_it < index_.size())
+        min_length_of_itemsets_in_range_ = index_[*current_set_it].second;
+      else
+        min_length_of_itemsets_in_range_ = 0;
+    }
 
     if (*current_set_it == candidate_item) {
       // The item we found matches the next candidate set item, which
