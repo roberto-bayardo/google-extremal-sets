@@ -106,8 +106,7 @@ class AllMaximalSetsLexicographic {
 
   // Prepare datastructures for scanning the data beginning at the
   // provided offset. Returns false if IO error encountered.
-  bool PrepareForDataScan(
-      DataSourceIterator* data, uint32_t max_item_i, off_t seek_offset);
+  bool PrepareForDataScan(DataSourceIterator* data, off_t seek_offset);
 
   // Delete any candidate subsumed by the given input_set.
   void DeleteSubsumedCandidates(unsigned int candidate_index);

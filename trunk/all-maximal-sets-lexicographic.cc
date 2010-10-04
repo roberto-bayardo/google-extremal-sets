@@ -73,8 +73,7 @@ AllMaximalSetsLexicographic::CandidateList::iterator find_new_it(
 
 }  // namespace
 
-bool AllMaximalSetsLexicographic::FindAllMaximalSets(
-    DataSourceIterator* data, uint32_t max_item_id) {
+bool AllMaximalSetsLexicographic::FindAllMaximalSets(DataSourceIterator* data, uint32_t) {
   Init();
 
   // Vars set by the data source iterator.
@@ -90,71 +89,100 @@ bool AllMaximalSetsLexicographic::FindAllMaximalSets(
   off_t start_offset = 0;
   off_t resume_offset = 0;
   do {  // while (resume_offset != 0)
-    if (!PrepareForDataScan(data, max_item_id, resume_offset))
+    if (!PrepareForDataScan(data, resume_offset))
       return false;  // IO error
     start_offset = resume_offset;
     resume_offset = 0;
     items_in_ram_ = 0;
-    // This loop scans the input data from beginning to end.
-    int min_itemset_length =  std::numeric_limits<int>::max();
+    // This loop scans the input data from beginning to end, and reads
+    // in a chunk of data to process, up to the max_items_in_ram_
+    // limit.
     while ((result = data->Next(&set_id, &current_set)) > 0) {
-      if (resume_offset == 0) {
-        // Copy the current_set into RAM and place a pointer to it in index_
-        // if necessary. Replace any previous sets that are prefixes of the
-        // current one.
-        bool previous_subsumed;
-	do {  // while (previous_subsumed)
-	  previous_subsumed = false;
-	  if (candidates_.size() &&
-	      candidates_.back()->size < current_set.size()) {
-	    SetProperties* previous = candidates_.back();
-	    previous_subsumed = true;
-	    for (unsigned int i = 0; i < previous->size; ++i) {
-	      if (previous->item[i] != current_set[i]){
-		previous_subsumed = false;
-		break;
-	      }
-	    }
-	  }
-	  if (previous_subsumed) {
-	    SetProperties* previous_candidate =
-	      candidates_[candidates_.size() - 1];
-	    items_in_ram_ -= previous_candidate->size;
-	    SetProperties::Delete(previous_candidate);
-	    candidates_.resize(candidates_.size() - 1);
-	  }
-	} while (previous_subsumed);
-	candidates_.push_back(SetProperties::Create(set_id, current_set));
-	if (current_set[0] >= index_.size()) {
-	  unsigned int old_size = index_.size();
-	  index_.resize(current_set[0] + 1);
-	  for (unsigned int i = old_size; i <= current_set[0]; ++i) {
-	    index_[i] = std::make_pair(candidates_.size() - 1, 0);
-	  }
-	  if (old_size)
-	    index_[old_size - 1].second = min_itemset_length;
-	  min_itemset_length = current_set.size();
-	} else if (current_set.size() < min_itemset_length) {
-	  min_itemset_length = current_set.size();
-	}
-        items_in_ram_ += current_set.size();
-        ++input_sets_count_;
-        // Check if we've exceeded the RAM limit and if so stop
-        // retaining any further itemsets in memory until the next
-        // scan.
-        if (items_in_ram_ >= max_items_in_ram_) {
-          resume_offset = data->Tell();
-          std::cerr << "; Halting indexing at input set number "
-                    << input_sets_count_ << " with id " << set_id << std::endl;
-	  result = 0;
-	  break;
-        }
-	previous_set = current_set;
+      assert(resume_offset == 0);
+      candidates_.push_back(SetProperties::Create(set_id, current_set));
+      items_in_ram_ += current_set.size();
+      ++input_sets_count_;
+      // Check if we've exceeded the RAM limit and if so stop
+      // retaining any further itemsets in memory until the next
+      // scan.
+      if (items_in_ram_ >= max_items_in_ram_) {
+	resume_offset = data->Tell();
+	std::cerr << "; Halting indexing at input set number "
+		  << input_sets_count_ << " with id " << set_id << std::endl;
+	result = 0;
+	break;
       }
+      previous_set = current_set;
     }  // while ((result = data->Next() ...
-
     if (result != 0)  // IO error
       return false;
+
+    std::cerr << "; Deleting trivially subsumed itemsets..." << std::endl;
+    // Now iterate over this chunk backwards and delete itemsets that
+    // are tivially subsumed based on prefix comparison.
+    assert(candidates_.size());
+    SetProperties* not_a_prefix_itemset = candidates_.back();
+    for (int i = candidates_.size() - 2; i >= 0; --i) {
+      SetProperties* candidate = candidates_[i];
+      bool subsumed = false;
+      if (candidate->size < not_a_prefix_itemset->size) {
+	subsumed = true;
+	for (unsigned int j = 0; j < candidate->size; ++j) {
+	  if (candidate->item[j] != not_a_prefix_itemset->item[j]){
+	    subsumed = false;
+	    break;
+	  }
+	}
+      }
+      if (subsumed) {
+	items_in_ram_ -= candidate->size;
+	SetProperties::Delete(candidate);
+	candidates_[i] = 0;
+      } else {
+	not_a_prefix_itemset = candidate;
+      }
+    }
+
+    // Finally, we compress out the blanks, identify blocks of candidates that
+    // start with the same item id, and build the index.
+    std::cerr << "; Building index..." << std::endl;
+    int blanks = 0;
+    size_t min_size_itemset_in_block = 0;
+    index_.resize(candidates_.back()->item[0] + 1);
+    int begin_candidate_index = -1;
+    SetProperties* begin_candidate = 0;  // candidate at the beginning of a block.
+    uint32_t previous_item = 0;
+    for (size_t i = 0; i < candidates_.size(); ++i) {
+      SetProperties* candidate = candidates_[i];
+      if (!candidate) {
+	blanks++;
+      } else {
+	candidates_[i - blanks] = candidate;
+	if (!begin_candidate) {
+	  begin_candidate = candidate;
+	  begin_candidate_index = i - blanks;
+	  min_size_itemset_in_block = begin_candidate->size;
+	} else if (candidate->item[0] != begin_candidate->item[0]) {
+	  // We've started a new block. Update the index with
+	  // the stats from the previous block.
+	  assert(min_size_itemset_in_block > 0);
+	  for (uint32_t item = previous_item + 1; item <= begin_candidate->item[0]; ++item) {
+	    index_[item] = std::make_pair(begin_candidate_index, min_size_itemset_in_block);
+	  }
+	  previous_item = begin_candidate->item[0];
+	  begin_candidate = candidate;
+	  begin_candidate_index = i - blanks;
+	  min_size_itemset_in_block = begin_candidate->size;
+	}
+	if (min_size_itemset_in_block > candidate->size)
+	  min_size_itemset_in_block = candidate->size;
+      }
+    }  // for()
+    // Finish processing the final block.
+    for (uint32_t item = previous_item + 1; item <= begin_candidate->item[0]; ++item) {
+      index_[item] = std::make_pair(begin_candidate_index, min_size_itemset_in_block);
+    }
+    candidates_.resize(candidates_.size() - blanks);
 
     std::cerr << "; Potential maximal sets: " << candidates_.size() << '\n'
 	      << "; Beginning subsumption checking scan." << std::endl;
@@ -163,7 +191,7 @@ bool AllMaximalSetsLexicographic::FindAllMaximalSets(
 	DeleteSubsumedCandidates(i);
     }
     if (start_offset != 0) {
-      if (!PrepareForDataScan(data, max_item_id, 0))
+      if (!PrepareForDataScan(data, 0))
         return false;  // IO error
       while (data->Tell() < start_offset &&
              (result = data->Next(&set_id, &current_set)) > 0) {
@@ -186,8 +214,7 @@ void AllMaximalSetsLexicographic::Init() {
 }
 
 bool AllMaximalSetsLexicographic::PrepareForDataScan(
-    DataSourceIterator* data, uint32_t max_item_id, off_t resume_offset) {
-  index_.reserve(max_item_id + 1);
+    DataSourceIterator* data, off_t resume_offset) {
   std::cerr << "; Starting new dataset scan at offset: "
             << resume_offset << std::endl;
   return data->Seek(resume_offset);
