@@ -153,7 +153,7 @@ bool AllMaximalSetsLexicographic::ReadNextChunk(
       *resume_offset = data->Tell();
       std::cerr << "; Halted scan at input set number "
 		<< input_sets_count_ << " with id " << set_id << std::endl;
-      return false;
+      return true;
     }
   }  // while ((result = data->Next() ...
   return result == 0;
