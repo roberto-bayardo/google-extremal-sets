@@ -108,6 +108,23 @@ class AllMaximalSetsLexicographic {
   // provided offset. Returns false if IO error encountered.
   bool PrepareForDataScan(DataSourceIterator* data, off_t seek_offset);
 
+  // Scans the input data from beginning to end, and reads in a chunk
+  // of data to process, up to the max_items_in_ram_ limit. Returns
+  // false on IO error. seek_offset will contain the point at which
+  // scanning stopped if the max_items_in_ram_ limit was reached.
+  // Otherwise it is set to 0.
+  bool ReadNextChunk(DataSourceIterator* data, off_t* seek_offset);
+
+  // Iterates over the current chunk backwards and delete itemsets
+  // that are tivially subsumed based on prefix comparison.
+  void DeleteTriviallySubsumedCandidates();
+
+  // Compresses out the blanks left by deleting trivially subsumed
+  // itemsets, identifies blocks of candidates that start with the
+  // same item id, and builds the index that maps each item to the
+  // first candidate that starts with that item.
+  void BuildIndex();
+
   // Delete any candidate subsumed by the given input_set.
   void DeleteSubsumedCandidates(unsigned int candidate_index);
   void DeleteSubsumedCandidates(const ItemSet& itemset);
