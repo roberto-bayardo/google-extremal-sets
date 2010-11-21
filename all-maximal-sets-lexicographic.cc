@@ -192,7 +192,6 @@ void AllMaximalSetsLexicographic::BuildIndex() {
   // start with the same item id, and build the index.
   std::cerr << "; Building index..." << std::endl;
   int blanks = 0;
-  size_t min_size_itemset_in_block = 0;
   index_.resize(candidates_.back()->item[0] + 1);
   int begin_candidate_index = -1;
   SetProperties* begin_candidate = 0;  // candidate at the beginning of a block.
@@ -206,26 +205,21 @@ void AllMaximalSetsLexicographic::BuildIndex() {
       if (!begin_candidate) {
 	begin_candidate = candidate;
 	begin_candidate_index = i - blanks;
-	min_size_itemset_in_block = begin_candidate->size;
       } else if (candidate->item[0] != begin_candidate->item[0]) {
 	// We've started a new block. Update the index with
 	// the stats from the previous block.
-	assert(min_size_itemset_in_block > 0);
 	for (uint32_t item = previous_item + 1; item <= begin_candidate->item[0]; ++item) {
-	  index_[item] = std::make_pair(begin_candidate_index, min_size_itemset_in_block);
+	  index_[item] = begin_candidate_index;
 	}
 	previous_item = begin_candidate->item[0];
 	begin_candidate = candidate;
 	begin_candidate_index = i - blanks;
-	min_size_itemset_in_block = begin_candidate->size;
       }
-      if (min_size_itemset_in_block > candidate->size)
-	min_size_itemset_in_block = candidate->size;
     }
   }  // for()
   // Finish processing the final block.
   for (uint32_t item = previous_item + 1; item <= begin_candidate->item[0]; ++item) {
-    index_[item] = std::make_pair(begin_candidate_index, min_size_itemset_in_block);
+    index_[item] = begin_candidate_index;
   }
   candidates_.resize(candidates_.size() - blanks);
 }
@@ -233,15 +227,12 @@ void AllMaximalSetsLexicographic::BuildIndex() {
 void AllMaximalSetsLexicographic::DeleteSubsumedCandidates(unsigned int current_set_index) {
   current_set_ = candidates_[current_set_index];
   assert(current_set_);
-  // If the set is of size 1 it cannot subsume anything (assuming no
-  // dupes)
   if (current_set_->size <= 1)
     return;
 
   const uint32_t* current_set_it = current_set_->begin();
   // The first candidate_set we consider is the first set following
   // current_set in the ordering, if one exists.
-  //min_length_of_itemsets_in_range_ = 0;
   CandidateList::iterator begin_range_it =
       candidates_.begin() + current_set_index + 1;
   DeleteSubsumedFromRange(begin_range_it, candidates_.end(), current_set_it, 0);
@@ -253,7 +244,6 @@ void AllMaximalSetsLexicographic::DeleteSubsumedCandidates(const ItemSet& itemse
   current_set_ = SetProperties::Create(0, itemset);
 
   const uint32_t* current_set_it = current_set_->begin();
-  //min_length_of_itemsets_in_range_ = 0;
   DeleteSubsumedFromRange(
       candidates_.begin(), candidates_.end(), current_set_it, 0);
   SetProperties::Delete(current_set_);
@@ -298,10 +288,8 @@ AllMaximalSetsLexicographic::CandidateList::iterator AllMaximalSetsLexicographic
     // At depth 0 we can use the index rather than binary search.
     if (current_item >= index_.size())
       return end_range_it;
-    //min_length_of_itemsets_in_range_ = index_[current_item].second;
-    //assert(min_length_of_itemsets_in_range_ > 0);
-    if (candidates_.begin() + index_[current_item].first > begin_range_it) {
-      begin_range_it = candidates_.begin() + index_[current_item].first;
+    if (candidates_.begin() + index_[current_item] > begin_range_it) {
+      begin_range_it = candidates_.begin() + index_[current_item];
     }
     while (begin_range_it != end_range_it && !*begin_range_it)
       ++begin_range_it;
@@ -316,7 +304,8 @@ AllMaximalSetsLexicographic::CandidateList::iterator AllMaximalSetsLexicographic
   return begin_range_it;
 }
 
-inline AllMaximalSetsLexicographic::CandidateList::iterator AllMaximalSetsLexicographic::GetNewEndRangeIt(
+inline
+AllMaximalSetsLexicographic::CandidateList::iterator AllMaximalSetsLexicographic::GetNewEndRangeIt(
     CandidateList::iterator begin_range_it,
     CandidateList::iterator end_range_it,
     uint32_t current_item,
@@ -326,7 +315,7 @@ inline AllMaximalSetsLexicographic::CandidateList::iterator AllMaximalSetsLexico
   if (depth == 0) {
     // At depth 0 we can use the index rather than binary search.
     if (current_item + 1 < index_.size()) {
-      new_end_range_it = candidates_.begin() + index_[current_item + 1].first;
+      new_end_range_it = candidates_.begin() + index_[current_item + 1];
       assert(new_end_range_it <= end_range_it);
     } else {
       new_end_range_it = end_range_it;
@@ -356,9 +345,6 @@ void AllMaximalSetsLexicographic::DeleteSubsumedFromRange(
   DeleteSubsumedSets(&begin_range_it, end_range_it, depth);
   if (begin_range_it == end_range_it || current_set_it == current_set_->end())
     return;
-  /*int max_candidate_size = depth + (current_set_->end() - current_set_it);
-  if (max_candidate_size < min_length_of_itemsets_in_range_)
-  return;*/
 
   do {  // while (begin_range_it != end_range_it)
     // First thing we do is find the next item in the current_set
@@ -374,12 +360,6 @@ void AllMaximalSetsLexicographic::DeleteSubsumedFromRange(
       return;
 
     assert(*current_set_it >= candidate_item);
-    /*if (depth == 0) {
-      if (*current_set_it < index_.size())
-        min_length_of_itemsets_in_range_ = index_[*current_set_it].second;
-      else
-        min_length_of_itemsets_in_range_ = 0;
-	}*/
 
     if (*current_set_it == candidate_item) {
       // The item we found matches the next candidate set item, which

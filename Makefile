@@ -53,6 +53,6 @@ depend:
 	$(CC) -MM -c $(OBJS_lexicographic_c) $(OBJS_cardinality_c) $(OBJS_sorter_c) $(OBJS_dimacs-to-apriori) $(OBJS_item-fixer_c) > Makefile.dependencies
 
 clean:
-	rm ams-* *.o
+	rm ams-* item-fixer dimacs-to-apriori sorter *.o
 
 -include Makefile.dependencies
