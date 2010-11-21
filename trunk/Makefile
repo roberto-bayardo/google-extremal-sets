@@ -23,6 +23,9 @@ OBJS_sorter_o = $(OBJS_sorter_c:.cc=.o)
 OBJS_dimacs-to-apriori_c = main-dimacs-to-apriori.cc dimacs-to-apriori.cc $(OBJS_c)
 OBJS_dimacs-to-apriori_o = $(OBJS_dimacs-to-apriori_c:.cc=.o)
 
+OBJS_item-fixer_c = main-item-fixer.cc item-fixer.cc $(OBJS_c)
+OBJS_item-fixer_o = $(OBJS_item-fixer_c:.cc=.o)
+
 all: ams-lexicographic ams-cardinality ams-satelite
 
 ams-lexicographic: $(OBJS_lexicographic_c) $(OBJS_lexicographic_o)
@@ -40,11 +43,14 @@ sorter: $(OBJS_sorter_c) $(OBJS_sorter_o)
 dimacs-to-apriori: $(OBJS_dimacs-to-apriori_c) $(OBJS_dimacs-to-apriori_o)
 		$(CC) $(CFLAGS) $(LINKFLAGS) -o dimacs-to-apriori $(OBJS_dimacs-to-apriori_o) $(LIBS)
 
+item-fixer: $(OBJS_item-fixer_c) $(OBJS_item-fixer_o)
+		$(CC) $(CFLAGS) $(LINKFLAGS) -o item-fixer $(OBJS_item-fixer_o) $(LIBS)
+
 .cc.o:
 	$(CC) $(CFLAGS) -c $<
 
 depend:
-	$(CC) -MM -c $(OBJS_lexicographic_c) $(OBJS_cardinality_c) $(OBJS_sorter_c) $(OBJS_dimacs-to-apriori_c) > Makefile.dependencies
+	$(CC) -MM -c $(OBJS_lexicographic_c) $(OBJS_cardinality_c) $(OBJS_sorter_c) $(OBJS_dimacs-to-apriori) $(OBJS_item-fixer_c) > Makefile.dependencies
 
 clean:
 	rm ams-* *.o
