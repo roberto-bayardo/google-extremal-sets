@@ -14,12 +14,7 @@
 // ---
 // Author: Roberto Bayardo
 
-#include "dimacs-to-apriori.h"
-#include "set-properties.h"
-
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
+#include "sorter.h"
 
 #include <algorithm>
 #include <ext/hash_map>
@@ -28,104 +23,39 @@
 #include <utility>
 #include <vector>
 
+#include "basic-types.h"
+#include "data-source-iterator.h"
+#include "set-properties.h"
+
 using namespace std;
 using __gnu_cxx::hash_map;
-
-namespace {
-
-string ToString(uint32_t l) {
-  char buf[30];
-  sprintf(buf, "%u", l);
-  return string(buf);
-}
-
-}  // namespace
 
 namespace google_extremal_sets {
 
 SetPropertiesCompareFunctor compare_set_properties;
 SetPropertiesCardinalityCompareFunctor compare_set_properties_cardinality;
 
-/*static*/
-DimacsIterator* DimacsIterator::Get(const char* filename) {
-  FILE* data = fopen(filename, "r");
-  if (!data) {
-    cerr << "ERROR: Failed to open input file ("
-              << filename << "): " << strerror(errno) << "\n";
-    return 0;
-  }
-  return new DimacsIterator(data);
-}
-
-DimacsIterator::DimacsIterator(FILE* data)
-  : data_(data) {
-}
-
-DimacsIterator::~DimacsIterator() {
-  fclose(data_);
-  data_ = 0;
-}
-
-int DimacsIterator::Next(vector<int>* vec) {
-  vec->clear();
-  // Now read the literals, until we reach the "0" terminator.
-  // If we ever read a "0" right at the beginning of a line it's probably the header
-  // or a comment line, so we can just continue.
-  int literal;
-  int scan_result;
-  while ((scan_result = fscanf(data_, "%u", &literal)) != EOF) {
-    if (ferror(data_)) {
-      error_ = "Dataset read error, ferror code=" + ToString(ferror(data_));
-      return -1;
-    }
-    if (!scan_result) {
-      // No conversions, probably a comment or header line.
-      if (vec->size()) {
-	error_ = "Unexpected non-integer in clause encountered.";
-	return -1;
-      }
-      char c;
-      // Skip the current line and continue.
-      while ((scan_result = fscanf(data_, "%c", &c)) != EOF && scan_result != 0 && c != '\n') {
-      }
-      continue;
-    }
-    if (literal) {
-      vec->push_back(literal);
-    } else {
-      if (vec->size()) {
-	return 1;
-      } else {
-	error_ = "Empty clause encountered.";
-	return -1;
-      }
-    }
-  }
-  return 0;
-}
-
-bool DimacsToApriori(
-    DimacsIterator* data,
-    const char* output_path,
-    bool by_cardinality) {
+bool FixItems(
+    DataSourceIterator* data, const char* output_path, bool by_cardinality) {
   FILE* output_file = fopen(output_path, "wb");
   if (!output_file) {
     cerr << "; Could not open output file for writing: "
               << output_path << "\n";
     return false;
   }
-  vector<int> clause;
+  vector<uint32_t> clause;
 
   // First read in the data & compute the literal frequencies.
-  hash_map<int, uint32_t> literals;
-  vector<vector<int>*> clauses;
+  hash_map<uint32_t, uint32_t> literals;
+  vector<vector<uint32_t>*> clauses;
+  uint32_t vector_id;
   cerr << "; Reading data..." << endl;
   int result;
-  while ((result = data->Next(&clause)) == 1) {
+  while ((result = data->Next(&vector_id, &clause)) == 1) {
     for (int i = 0; i < clause.size(); ++i) {
       ++literals[clause[i]];
     }
-    clauses.push_back(new vector<int>(clause));
+    clauses.push_back(new vector<uint32_t>(clause));
   }
   if (result < 0)
     return false;
@@ -134,16 +64,16 @@ bool DimacsToApriori(
   // Now assign each literal an item id, by replacing its
   // frequency in the literal hash_map with its id.
   {
-    int item_id = 1;
-    vector<pair<uint32_t, int> > frequency_to_item;
-    for (hash_map<int, uint32_t>::const_iterator it = literals.begin();
+    uint32_t item_id = 1;
+    vector<pair<uint32_t, uint32_t> > frequency_to_item;
+    for (hash_map<uint32_t, uint32_t>::const_iterator it = literals.begin();
 	 it != literals.end();
 	 ++it) {
       frequency_to_item.push_back(make_pair(it->second, it->first));
     }
     sort(frequency_to_item.begin(), frequency_to_item.end());
     for (int i = 0; i < frequency_to_item.size(); ++i) {
-      pair<uint32_t, int>& pair = frequency_to_item[i];
+      pair<uint32_t, uint32_t>& pair = frequency_to_item[i];
       //cout << "; Mapping literal " << pair.second << " to item_id: " << item_id << '\n';
       literals[pair.second] = item_id;
       ++item_id;
@@ -156,7 +86,7 @@ bool DimacsToApriori(
   vector<SetProperties*> sort_us;
   for (int i = 0; i < clauses.size(); ++i) {
     items.clear();
-    vector<int>& clause = *(clauses[i]);
+    vector<uint32_t>& clause = *(clauses[i]);
     items.clear();
     for (int j = 0; j < clause.size(); ++j) {
       items.push_back(literals[clause[j]]);
