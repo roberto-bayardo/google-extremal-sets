@@ -178,11 +178,10 @@ class AllMaximalSetsLexicographic {
   // Index into candidates_. Maps each item id to the position within
   // candidates_ containing the first set in the lexicographic
   // ordering to follow the singleton set { item_id }.
-  std::vector<std::pair<CandidateList::size_type, int> > index_;
+  std::vector<CandidateList::size_type> index_;
 
   // Temporary/global variables
   SetProperties* current_set_;
-  int min_length_of_itemsets_in_range_;
 
   // Configuration options.
   uint32_t items_in_ram_, max_items_in_ram_;
