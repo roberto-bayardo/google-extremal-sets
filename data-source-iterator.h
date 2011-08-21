@@ -69,7 +69,6 @@ class DataSourceIterator {
   DataSourceIterator(FILE* data);
 
   FILE* data_;
-  uint32_t last_vector_size_;
   int lines_processed_;
   std::string error_;
 };
