@@ -67,8 +67,8 @@ bool FixItems(
     uint32_t item_id = 1;
     vector<pair<uint32_t, uint32_t> > frequency_to_item;
     for (hash_map<uint32_t, uint32_t>::const_iterator it = literals.begin();
-	 it != literals.end();
-	 ++it) {
+         it != literals.end();
+         ++it) {
       frequency_to_item.push_back(make_pair(it->second, it->first));
     }
     sort(frequency_to_item.begin(), frequency_to_item.end());

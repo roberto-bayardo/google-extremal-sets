@@ -57,11 +57,11 @@ AllMaximalSetsLexicographic::CandidateList::iterator find_new_it(
       first += half + 1;
       len = len - half - 1;
       while (first < last && !*first) {
-	++first;
-	--len;
+        ++first;
+        --len;
       }
       if (first == last)
-	return last;
+        return last;
     } else {
       // We may be too far along.
       len = half;
@@ -100,10 +100,10 @@ bool AllMaximalSetsLexicographic::FindAllMaximalSets(DataSourceIterator* data, u
     BuildIndex();
 
     std::cerr << "; Potential maximal sets: " << candidates_.size() << '\n'
-	      << "; Beginning subsumption checking scan." << std::endl;
+              << "; Beginning subsumption checking scan." << std::endl;
     for (unsigned int i = 0; i < candidates_.size() - 1; ++i) {
       if (candidates_[i])  // check to make sure not already deleted.
-	DeleteSubsumedCandidates(i);
+        DeleteSubsumedCandidates(i);
     }
     if (start_offset != 0) {
       if (!PrepareForDataScan(data, 0))
@@ -152,7 +152,7 @@ bool AllMaximalSetsLexicographic::ReadNextChunk(
     if (items_in_ram_ >= max_items_in_ram_) {
       *resume_offset = data->Tell();
       std::cerr << "; Halted scan at input set number "
-		<< input_sets_count_ << " with id " << set_id << std::endl;
+                << input_sets_count_ << " with id " << set_id << std::endl;
       return true;
     }
   }  // while ((result = data->Next() ...
@@ -171,10 +171,10 @@ void AllMaximalSetsLexicographic::DeleteTriviallySubsumedCandidates() {
     if (candidate->size < not_a_prefix_itemset->size) {
       subsumed = true;
       for (unsigned int j = 0; j < candidate->size; ++j) {
-	if (candidate->item[j] != not_a_prefix_itemset->item[j]){
-	  subsumed = false;
-	  break;
-	}
+        if (candidate->item[j] != not_a_prefix_itemset->item[j]) {
+          subsumed = false;
+          break;
+        }
       }
     }
     if (subsumed) {
@@ -203,17 +203,17 @@ void AllMaximalSetsLexicographic::BuildIndex() {
     } else {
       candidates_[i - blanks] = candidate;
       if (!begin_candidate) {
-	begin_candidate = candidate;
-	begin_candidate_index = i - blanks;
+        begin_candidate = candidate;
+        begin_candidate_index = i - blanks;
       } else if (candidate->item[0] != begin_candidate->item[0]) {
-	// We've started a new block. Update the index with
-	// the stats from the previous block.
-	for (uint32_t item = previous_item + 1; item <= begin_candidate->item[0]; ++item) {
-	  index_[item] = begin_candidate_index;
-	}
-	previous_item = begin_candidate->item[0];
-	begin_candidate = candidate;
-	begin_candidate_index = i - blanks;
+        // We've started a new block. Update the index with
+        // the stats from the previous block.
+        for (uint32_t item = previous_item + 1; item <= begin_candidate->item[0]; ++item) {
+          index_[item] = begin_candidate_index;
+        }
+        previous_item = begin_candidate->item[0];
+        begin_candidate = candidate;
+        begin_candidate_index = i - blanks;
       }
     }
   }  // for()
@@ -370,7 +370,7 @@ void AllMaximalSetsLexicographic::DeleteSubsumedFromRange(
       assert(new_end_range_it >= begin_range_it);
       if (begin_range_it != new_end_range_it) {
         DeleteSubsumedFromRange(
-	    begin_range_it, new_end_range_it, current_set_it + 1, depth + 1);
+            begin_range_it, new_end_range_it, current_set_it + 1, depth + 1);
       }
       begin_range_it = new_end_range_it;
       while (begin_range_it != end_range_it && !*begin_range_it)

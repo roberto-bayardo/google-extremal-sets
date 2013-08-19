@@ -16,7 +16,7 @@
 // Invoke the item-fixer utility to fix a given a binary formatted dataset.
 // To invoke:
 //
-// ./item-fixer [-c] <path_to_dimacs_dataset> <path_to_output_dataset>
+// ./item-fixer [-c] <path_to_input_dataset> <path_to_output_dataset>
 //
 // If -c option is specified, the input dataset will be sorted in
 // increasing cardinality of its itemsets. Otherwise the dataset will
