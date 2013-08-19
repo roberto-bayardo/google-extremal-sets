@@ -81,8 +81,8 @@ int DimacsIterator::Next(vector<int>* vec) {
     if (!scan_result) {
       // No conversions, probably a comment or header line.
       if (vec->size()) {
-	error_ = "Unexpected non-integer in clause encountered.";
-	return -1;
+        error_ = "Unexpected non-integer in clause encountered.";
+        return -1;
       }
       char c;
       // Skip the current line and continue.
@@ -94,10 +94,10 @@ int DimacsIterator::Next(vector<int>* vec) {
       vec->push_back(literal);
     } else {
       if (vec->size()) {
-	return 1;
+        return 1;
       } else {
-	error_ = "Empty clause encountered.";
-	return -1;
+        error_ = "Empty clause encountered.";
+        return -1;
       }
     }
   }
@@ -137,8 +137,8 @@ bool DimacsToApriori(
     int item_id = 1;
     vector<pair<uint32_t, int> > frequency_to_item;
     for (hash_map<int, uint32_t>::const_iterator it = literals.begin();
-	 it != literals.end();
-	 ++it) {
+         it != literals.end();
+         ++it) {
       frequency_to_item.push_back(make_pair(it->second, it->first));
     }
     sort(frequency_to_item.begin(), frequency_to_item.end());

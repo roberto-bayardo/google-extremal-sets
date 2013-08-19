@@ -188,8 +188,8 @@ void AllMaximalSetsCardinality::DeleteSubsumedCandidates(
       // the same as current_set[i].
       // We adjust the iterators accordingly.
       if (DoesSubsume(
-	      current_begin, current_end,
-	      candidate->begin() + 1, candidate->end())) {
+             current_begin, current_end,
+             candidate->begin() + 1, candidate->end())) {
         // Candidate is not maximal, so we delete it. Note that we
         // must preserve the cardinality based ordering, so we NULL
         // out the pointer to the deleted entry rather than performing
@@ -197,7 +197,7 @@ void AllMaximalSetsCardinality::DeleteSubsumedCandidates(
         // compress out the holes left by the NULL entries if we have
         // accumulated a significant number of them.
         candidates[candidate_index] = 0;
-	SetProperties::Delete(candidate);
+        SetProperties::Delete(candidate);
       }
       ++subsumption_checks_count_;
     }
@@ -219,7 +219,7 @@ void AllMaximalSetsCardinality::DumpMaximalSets(
       SetProperties* maximal_set = candidate_set[j];
       if (maximal_set) {
         FoundMaximalSet(*maximal_set, output_mode);
-	SetProperties::Delete(maximal_set);
+        SetProperties::Delete(maximal_set);
       }
     }
     candidate_set.clear();
